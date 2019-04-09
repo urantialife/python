@@ -3,9 +3,6 @@ services: docker
 
 matrix:
   include:
-    - os: windows
-      dist: 1803-containers
-      env: VERSION=3.8-rc VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=3.8-rc VARIANT=stretch
     - os: linux
@@ -14,7 +11,7 @@ matrix:
       env: VERSION=3.8-rc VARIANT=alpine3.9
     - os: windows
       dist: 1803-containers
-      env: VERSION=3.7 VARIANT=windows/windowsservercore-1803
+      env: VERSION=3.8-rc VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=3.7 VARIANT=stretch
     - os: linux
@@ -25,7 +22,7 @@ matrix:
       env: VERSION=3.7 VARIANT=alpine3.8
     - os: windows
       dist: 1803-containers
-      env: VERSION=3.6 VARIANT=windows/windowsservercore-1803
+      env: VERSION=3.7 VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=3.6 VARIANT=stretch
     - os: linux
@@ -38,6 +35,9 @@ matrix:
       env: VERSION=3.6 VARIANT=alpine3.9
     - os: linux
       env: VERSION=3.6 VARIANT=alpine3.8
+    - os: windows
+      dist: 1803-containers
+      env: VERSION=3.6 VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=3.5 VARIANT=stretch
     - os: linux
@@ -50,9 +50,6 @@ matrix:
       env: VERSION=3.5 VARIANT=alpine3.9
     - os: linux
       env: VERSION=3.5 VARIANT=alpine3.8
-    - os: windows
-      dist: 1803-containers
-      env: VERSION=2.7 VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=2.7 VARIANT=stretch
     - os: linux
@@ -65,6 +62,9 @@ matrix:
       env: VERSION=2.7 VARIANT=alpine3.9
     - os: linux
       env: VERSION=2.7 VARIANT=alpine3.8
+    - os: windows
+      dist: 1803-containers
+      env: VERSION=2.7 VARIANT=windows/windowsservercore-1803
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images

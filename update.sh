@@ -46,6 +46,7 @@ generated_warning() {
 	EOH
 }
 
+azureEnv=
 travisEnv=
 appveyorEnv=
 for version in "${versions[@]}"; do
@@ -113,9 +114,9 @@ for version in "${versions[@]}"; do
 	echo "$version: $fullVersion"
 
 	for v in \
+		windows/windowsservercore-{1809,1803,ltsc2016} \
 		alpine{3.8,3.9} \
 		{jessie,stretch}{/slim,} \
-		windows/windowsservercore-{1809,1803,ltsc2016} \
 	; do
 		dir="$version/$v"
 		variant="$(basename "$v")"
@@ -182,8 +183,10 @@ for version in "${versions[@]}"; do
 				;;
 		esac
 
+		azureImage=
 		case "$v" in
 			windows/*-1803)
+				azureImage='win1803'
 				travisEnv='\n    - os: windows\n      dist: 1803-containers\n      env: VERSION='"$version VARIANT=$v$travisEnv"
 				;;
 
@@ -194,14 +197,23 @@ for version in "${versions[@]}"; do
 				;;
 
 			*)
+				azureImage='ubuntu-16.04'
 				travisEnv='\n    - os: linux\n      env: VERSION='"$version VARIANT=$v$travisEnv"
 				;;
 		esac
+
+		if [ -n "$azureImage" ]; then
+			azureTag="$(sed 's!/!-!g' <<<"$dir")"
+			azureEnv="\n    $azureTag:\n      azureImage: '$azureImage'\n      buildContext: '$dir'\n      dockerTag: 'azure-pipelines/python:$azureTag'$azureEnv"
+		fi
 	done
 done
 
-travis="$(awk -v 'RS=\n\n' '$1 == "matrix:" { $0 = "matrix:\n  include:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
-echo "$travis" > .travis.yml
+azure="$(awk -v 'RS=\n\n' -v azureEnv="$azureEnv" '$1 == "strategy:" { $0 = "strategy:\n  matrix:" azureEnv } { printf "%s%s", $0, RS }' .azure.yml)"
+cat <<<"$azure" > .azure.yml
 
-appveyor="$(awk -v 'RS=\n\n' '$1 == "environment:" { $0 = "environment:\n  matrix:'"$appveyorEnv"'" } { printf "%s%s", $0, RS }' .appveyor.yml)"
-echo "$appveyor" > .appveyor.yml
+travis="$(awk -v 'RS=\n\n' -v travisEnv="$travisEnv" '$1 == "matrix:" { $0 = "matrix:\n  include:" travisEnv } { printf "%s%s", $0, RS }' .travis.yml)"
+cat <<<"$travis" > .travis.yml
+
+appveyor="$(awk -v 'RS=\n\n' -v appveyorEnv="$appveyorEnv" '$1 == "environment:" { $0 = "environment:\n  matrix:" appveyorEnv } { printf "%s%s", $0, RS }' .appveyor.yml)"
+cat <<<"$appveyor" > .appveyor.yml
